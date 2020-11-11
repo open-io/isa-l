@@ -20,8 +20,27 @@ matrix:
         - pushd /tmp/indent-2.2.12 && ./configure --prefix=/usr && make && sudo make install && popd
       env: C_COMPILER=gcc
 
+    - dist: xenial
+      arch: arm64
+      addons:
+        apt:
+          packages:
+            - nasm
+      install:
+        # Install newer indent to check formatting
+        - sudo apt-get install texinfo indent
+      env: C_COMPILER=gcc
+
     ### linux clang
     - dist: xenial
+      addons:
+        apt:
+          packages:
+            - nasm
+      env: C_COMPILER=clang
+
+    - dist: xenial
+      arch: arm64
       addons:
         apt:
           packages:
@@ -39,8 +58,29 @@ matrix:
             - clang-4.0
       env: C_COMPILER=clang-4.0
 
-    ### linux older gcc
     - dist: trusty
+      arch: arm64
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - clang-4.0
+      env: C_COMPILER=clang-4.0
+
+    ### linux older gcc
+    - dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.7
+      env: C_COMPILER=gcc-4.7
+
+    - dist: xenial
+      arch: arm64
       addons:
         apt:
           sources:
@@ -51,6 +91,16 @@ matrix:
 
     ### linux newer gcc
     - dist: trusty
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env: C_COMPILER=gcc-6
+
+    - dist: trusty
+      arch: arm64
       addons:
         apt:
           sources:
@@ -71,6 +121,15 @@ matrix:
             - wine
             - nasm
       env: TEST_TYPE=ext
+
+    - dist: focal
+      arch: arm64
+      env: TEST_TYPE=ext
+      before_install:
+        - sudo apt-get update && sudo apt-get install gcc-mingw-w64-x86-64 binutils-mingw-w64-x86-64 wine nasm indent
+        - if [ -n "${C_COMPILER}" ]; then export CC="${C_COMPILER}"; fi
+        - if [ -n "${AS_ASSEMBL}" ]; then export AS="${AS_ASSEMBL}"; fi
+
 
 before_install:
   - if [ -n "${C_COMPILER}" ]; then export CC="${C_COMPILER}"; fi
